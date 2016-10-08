@@ -1,3 +1,7 @@
+# Using Spark DataFrames and the tables orders and order_items from Cloudera QuickStart VM, following python commands
+# calculate the number of orders per day and the total revenue per day.
+
+
 df_orders = sqlContext.sql("select * from orders")
 df_items = sqlContext.sql("select * from order_items")
 df_join = df_items.join(df_orders, df_items.order_item_order_id == df_orders.order_id)
