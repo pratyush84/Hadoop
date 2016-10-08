@@ -1,0 +1,7 @@
+df_orders = sqlContext.sql("select * from orders")
+df_items = sqlContext.sql("select * from order_items")
+df_join = df_items.join(df_orders, df_items.order_item_order_id == df_orders.order_id)
+df_sub = df_join.select(df_join['order_date'],df_join['order_item_subtotal'])
+df_sub.select('order_date','order_item_subtotal').map(lambda (a,b): (a,b)).reduceByKey(add).sortByKey(False).saveAsTextFile("/user/root/revenuePerDay")
+df_sub2=df_join.select('order_date','order_item_order_id')
+df_sub2.dropDuplicates().groupBy(df_sub2.order_date).count().sort('order_date',ascending=False).write.format("com.databricks.spark.csv").option("header","true").save ("/user/root/output.csv")
