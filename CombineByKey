@@ -1,0 +1,19 @@
+#This example is to illustrate the usage of CombineByKey transformation in Spark.
+#Define an rdd consisting of names of varied lengths. RDD contains tuples having key-value pairs with "Name" as the key and the corresponding
+#country name.
+#Problem statement is to find the Name with maximum length.
+
+data = sc.parallelize([("Name","India"),("Name","Norway"),("Name","Australia"),("Name","Czechoslovakia")])
+
+#Define a function findMax which takes 2 strings as input and returns the string which has the maximum length.
+def findMax(a,b):
+  if(len(a) > len(b)):
+    return a
+  else:
+    return b
+    
+#Now we define the combineByKey transformation to find out the "Name" 
+data.combineByKey(lambda val: val, findMax, findMax).collect()
+
+#Once the above command is run, it gives the following output.
+[('Name', 'Czechoslovakia')]
