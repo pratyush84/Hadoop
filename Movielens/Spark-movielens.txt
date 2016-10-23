@@ -1,0 +1,84 @@
+number of movies with each rating
+>>> for i in rating.map(lambda rec: (rec.split(",")[2],1)).reduceByKey(lambda a,b: a+b).collect(): print(i)
+...
+(u'1', 56174)
+(u'3', 261197)
+(u'5', 226310)
+(u'2', 107557)
+(u'4', 348971)
+
+#Sorted by ascending keys
+>>> for i in rating.map(lambda rec: (rec.split(",")[2],1)).reduceByKey(lambda a,b: a+b).sortByKey().collect(): print(i)
+...
+(u'1', 56174)
+(u'2', 107557)
+(u'3', 261197)
+(u'4', 348971)
+(u'5', 226310)
+
+#Sorted by descending keys
+>>> for i in rating.map(lambda rec: (rec.split(",")[2],1)).reduceByKey(lambda a,b: a+b).sortByKey(False).collect(): print(i)
+...
+(u'5', 226310)
+(u'4', 348971)
+(u'3', 261197)
+(u'2', 107557)
+(u'1', 56174)
+
+#Sorted by ascending values
+>>> for i in rating.map(lambda rec: (rec.split(",")[2],1)).reduceByKey(lambda a,b: a+b).takeOrdered(5,lambda rec: rec[1]): print(i)
+...
+(u'1', 56174)
+(u'2', 107557)
+(u'5', 226310)
+(u'3', 261197)
+(u'4', 348971)
+
+#Sorted by descending values
+>>> for i in rating.map(lambda rec: (rec.split(",")[2],1)).reduceByKey(lambda a,b: a+b).takeOrdered(5,lambda rec: -rec[1]): print(i)
+...
+(u'4', 348971)
+(u'3', 261197)
+(u'5', 226310)
+(u'2', 107557)
+(u'1', 56174)
+
+#Movies given 5-rating by maximum users'
+>>> rating = sc.textFile("/user/root/movielens/ratings.csv")
+>>> MostFiveStar = rating.filter(lambda rec: rec.split(",")[2] == '5').map(lambda rec: (rec.split(",")[1],1)).reduceByKey(lambda x,y: x+y)
+>>> movies = sc.textFile("/user/root/movielens/movies.csv").map(lambda rec: (rec.split(",")[0], rec.split(",")[1]))
+>>> MostFiveStarJoin = MostFiveStar.join(movies).map(lambda rec: (rec[1][1], rec[1][0]))
+>>> for i in MostFiveStarJoin.takeOrdered(10,lambda x: -x[1]): print(i)
+...
+(u'American Beauty (1999)', 1963)
+(u'Star Wars: Episode IV - A New Hope (1977)', 1826)
+(u'Raiders of the Lost Ark (1981)', 1500)
+(u'Star Wars: Episode V - The Empire Strikes Back (1980)', 1483)
+(u'Godfather', 1475)
+(u"Schindler's List (1993)", 1475)
+(u'Shawshank Redemption', 1457)
+(u'Matrix', 1430)
+(u'Saving Private Ryan (1998)', 1405)
+(u'Sixth Sense', 1385)
+
+#Most favorite film for Females (maximum number of 5-ratings given to movie  by females)
+>>> rating = sc.textFile("/user/root/movielens/ratings.csv")
+>>> movies = sc.textFile("/user/root/movielens/movies.csv")
+>>> user = sc.textFile("/user/root/movielens/users.csv")
+>>> userParsed = user.filter(lambda rec: rec.split(",")[1] == 'F').map(lambda rec: (rec.split(",")[0], rec)
+>>> ratingParsed = rating.filter(lambda rec: rec.split(",")[2] == '5').map(lambda rec: (rec.split(",")[0], rec))
+>>> moviesParsed = movies.map(lambda rec: (rec.split(",")[0], rec.split(",")[1]))
+
+
+>>> ratingJoinMovies = ratingParsed.join(userParsed).map(lambda rec: (rec[1][0].split(",")[1], 1)).reduceByKey(lambda a,b: a+b)
+>>> finalJoin = moviesParsed.join(ratingJoinMovies).map(lambda rec: rec[1])
+>>> for i in finalJoin.takeOrdered(5,lambda x: -x[1]): print(i)
+...
+(u'American Beauty (1999)', 529)
+(u"Schindler's List (1993)", 418)
+(u'Shawshank Redemption', 410)
+(u'Sixth Sense', 408)
+(u'Shakespeare in Love (1998)', 370)
+
+
+
