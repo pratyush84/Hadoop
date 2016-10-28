@@ -1,0 +1,20 @@
+val firerdd = sc.textFile("/user/cloudera/sf_open_data")
+
+val regex = """[0-9]{2}\/[0-9]{2}\/[0-9]{4}"""
+val calldate = firerdd.map(_.split(",")(4)).filter(rec => rec.matches(regex))
+
+#number of distinct years in the record
+
+calldate.map(_.split("/")(2).toInt).distinct().takeOrdered(17)(Ordering[Int].reverse.on(k => k)).foreach(println)
+
+#how many service calls were logged in the past 7 days?
+calldate.filter(rec => rec.split("/")(2) == "2016" && rec.split("/")(0) == "10" && rec.split("/")(1).toInt > 20).count
+
+calldate.filter(rec => rec.split("/")(2) == "2016" && rec.split("/")(0) == "10" && rec.split("/")(1).toInt > 20).map(rec => (rec.split("/")(1),1)).reduceByKey(_+_).collect().foreach(println)
+(21,844)
+(22,793)
+(23,785)
+(24,725)
+(25,761)
+(26,884)
+
